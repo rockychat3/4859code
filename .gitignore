@@ -4,6 +4,7 @@
 
 *Builds/
 *PPC603gnu/
+.wrmakefile
 *.pydevproject
 .project
 .metadata
