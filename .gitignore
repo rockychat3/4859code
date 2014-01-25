@@ -4,9 +4,10 @@
 
 *Builds/
 *PPC603gnu/
-.wrmakefile
 *.pydevproject
 .project
+.wrmakefile
+.wrproject
 .metadata
 bin/
 tmp/
