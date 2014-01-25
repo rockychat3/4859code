@@ -3,6 +3,7 @@
 #################
 
 *Builds/
+*PPC603gnu/
 *.pydevproject
 .project
 .metadata
