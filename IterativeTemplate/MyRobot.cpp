@@ -5,17 +5,17 @@
  * The IterativeRobot class is the base of a robot application that will automatically call your
  * Periodic methods for each packet based on the mode.
  */ 
-class RobotDemo : public IterativeRobot
+class ByronMecanum : public IterativeRobot
 {
-	RobotDrive myRobot; // robot drive system
-	Joystick stick; // only joystick
+	RobotDrive robotDrive; // robot drive system
+	Joystick stick_1; // only joystick
 
 public:
-	RobotDemo():
-		myRobot(1, 2),	// these must be initialized in the same order
-		stick(1)		// as they are declared above.
+	ByronMecanum():
+		robotDrive(1, 2, 3, 4),	// these must be initialized in the same order
+		stick_1(1)		// as they are declared above.
 	{
-		myRobot.SetExpiration(0.1);
+		robotDrive.SetExpiration(0.1);
 		this->SetPeriod(0); 	//Set update period to sync with robot control packets (20ms nominal)
 	}
 	
@@ -25,7 +25,7 @@ public:
  * Use this method for default Robot-wide initialization which will
  * be called when the robot is first powered on.  It will be called exactly 1 time.
  */
-void RobotDemo::RobotInit() {
+void ByronMecanum::RobotInit() {
 }
 
 /**
@@ -34,7 +34,7 @@ void RobotDemo::RobotInit() {
  * Use this method for initialization code which will be called each time
  * the robot enters disabled mode. 
  */
-void RobotDemo::DisabledInit() {
+void ByronMecanum::DisabledInit() {
 }
 
 /**
@@ -43,7 +43,7 @@ void RobotDemo::DisabledInit() {
  * Use this method for code which will be called periodically at a regular
  * rate while the robot is in disabled mode.
  */
-void RobotDemo::DisabledPeriodic() {
+void ByronMecanum::DisabledPeriodic() {
 }
 
 /**
@@ -52,7 +52,7 @@ void RobotDemo::DisabledPeriodic() {
  * Use this method for initialization code which will be called each time
  * the robot enters autonomous mode.
  */
-void RobotDemo::AutonomousInit() {
+void ByronMecanum::AutonomousInit() {
 }
 
 /**
@@ -61,7 +61,7 @@ void RobotDemo::AutonomousInit() {
  * Use this method for code which will be called periodically at a regular
  * rate while the robot is in autonomous mode.
  */
-void RobotDemo::AutonomousPeriodic() {
+void ByronMecanum::AutonomousPeriodic() {
 }
 
 /**
@@ -70,7 +70,7 @@ void RobotDemo::AutonomousPeriodic() {
  * Use this method for initialization code which will be called each time
  * the robot enters teleop mode.
  */
-void RobotDemo::TeleopInit() {
+void ByronMecanum::TeleopInit() {
 }
 
 /**
@@ -79,8 +79,8 @@ void RobotDemo::TeleopInit() {
  * Use this method for code which will be called periodically at a regular
  * rate while the robot is in teleop mode.
  */
-void RobotDemo::TeleopPeriodic() {
-	myRobot.ArcadeDrive(stick); // drive with arcade style 
+void ByronMecanum::TeleopPeriodic() {
+	robotDrive.MecanumDrive_Cartesian(stick_1.GetX(), stick_1.GetY(), 0.0);
 }
 
 /**
@@ -89,7 +89,7 @@ void RobotDemo::TeleopPeriodic() {
  * Use this method for initialization code which will be called each time
  * the robot enters test mode.
  */
-void RobotDemo::TestInit() {
+void ByronMecanum::TestInit() {
 }
 
 /**
@@ -98,10 +98,10 @@ void RobotDemo::TestInit() {
  * Use this method for code which will be called periodically at a regular
  * rate while the robot is in test mode.
  */
-void RobotDemo::TestPeriodic() {
+void ByronMecanum::TestPeriodic() {
 }
 
 };
 
-START_ROBOT_CLASS(RobotDemo);
+START_ROBOT_CLASS(ByronMecanum);
 
