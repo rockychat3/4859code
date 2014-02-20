@@ -4,6 +4,7 @@
 
 *Builds/
 *PPC603gnu/
+*IterativeTemplate/
 *.pydevproject
 .project
 .wrmakefile
