@@ -1,0 +1,15 @@
+1= A	7= Back
+2= B	8= Start
+3= X	9= LA Click
+4= Y	10= RA Click
+5= LB	11= LT (Doesn't Work)
+6= RB	12= RT (Doesn't Work)
+
+Rockers (D-Pad)
+-GetRockerX
+-GetRockerY
+
+Left Analog*	Right Analog*
+-GetLeftX	-GetRightX
+-GetLeftY	-GetRightY
+

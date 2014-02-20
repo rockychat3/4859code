@@ -1,0 +1,74 @@
+Back Button (Custom Feel [Pethan Controls])
+-A to stop Shooter/cradle
+-B to cradle Lift up
+-X to start Shooter
+-Y to set down the shooter and Aquirer
+-Using left stick up and down to lower down
+-Using Right stick up and down for aquire and unaquire
+Start Button (COD CONTROLS)
+-A Lifts the cradle an lowers it in a 0.3 seconds
+-B Lowers down shooter and aquirer in a 0.5 seconds
+-X Aquire
+-use the Left Stick Y axis up and down 
+-LB start shooter (spin up)
+-RB stop shooter (spin down)
+if(xbox.GetButton07()) {
+if (xbox.GetButton01()){
+shooter_1.Set(0.0);
+shooter_2.Set(0.0);	
+cradle_lift.Set(-1.0);
+Wait(0.3);
+cradle_lift.Set(0.0);	
+}	
+if (xbox.GetButton02()) {
+cradle_lift.Set(1.0);
+Wait(0.3);
+cradle_lift.Set(0.0);
+}
+if(xbox.GetButton03()){
+shooter_1.Set(1.0);
+shooter_2.Set(1.0);
+}
+if(xbox.GetButton04()){
+if(xbox.GetLeftY()) {
+down.Set(1.0);
+Wait(0.5);
+down.Set(0.0);	
+}
+aquire.Set(xbox.GetRightY());
+} else {
+aquire.Set(0.0);
+}	
+}
+
+if(xbox.GetButton08()) {
+if(xbox.GetButton03()) {
+aquire.Set(xbox.GetLeftY());
+} else {
+aquire.Set(0.0);
+}	
+
+if(xbox.GetButton02()) {
+down.Set(1.0);
+Wait(0.5);
+down.Set(0.0);
+}
+
+if(xbox.GetButton01()){
+cradle_lift.Set(1.0);
+Wait(0.3);
+cradle_lift.Set(-1.0);
+Wait(0.3);
+cradle_lift.Set(0.0);
+}
+
+if(xbox.GetButton05()) {
+shooter_1.Set(1.0);
+shooter_2.Set(1.0);
+}
+
+if(xbox.GetButton06()) {
+shooter_1.Set(0.0);
+shooter_2.Set(0.0);
+}
+}
