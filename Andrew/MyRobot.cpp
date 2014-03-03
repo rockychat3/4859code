@@ -3,23 +3,54 @@
 #include "Victor.h"
 #include "Ultrasonic.h"
 #include "GamePad.h"
+#include "DriverStation.h"
+#include "Preferences.h"
+#include "networktables\NetworkTable.h"
+#include "networktables\NetworkTableConnectionListenerAdapter.h"
+#include "networktables\NetworkTableKeyListenerAdapter.h"
+#include "networktables\NetworkTableListenerAdapter.h"
+#include "networktables\NetworkTableMode.h"
+#include "networktables\NetworkTableProvider.h"
+#include "networktables\NetworkTableSubListenerAdapter.h"
+#include "SmartDashboard\SmartDashboard.h"
+#include "SmartDashboard\NamedSendable.h"
+#include "SmartDashboard\Sendable.h"
+#include "SmartDashboard\SendableChooser.h"
+#include "tables\IRemote.h"
+#include "tables\IRemoteConnectionListener.h"
+#include "tables\ITable.h"
+#include "tables\ITableListener.h"
+#include "tables\ITableProvider.h"
+#include "tables\TableKeyNotDefinedException.h"
+#include "tables\IRemoteConnectionListener.h"
+#include "NetworkCommunication\AICalibration.h"
+#include "NetworkCommunication\FRCComm.h"
+#include "NetworkCommunication\LoadOut.h"
+#include "NetworkCommunication\symModuleLink.h"
+#include "NetworkCommunication\UsageReporting.h"
+#include "LiveWindow\LiveWindow.h"
+#include "LiveWindow\LiveWindowSendable.h"
+#include "LiveWindow\LiveWindowStatusListener.h"
+
 //#include "Compressor.h"
 //#include "Solenoid.h"
 
+	
 /**
  * This is a demo program showing the use of the RobotBase class.
  * The IterativeRobot class is the base of a robot application that will automatically call your
  * Periodic methods for each packet based on the mode.
  */ 
 
+
 class ByronMecanum : public IterativeRobot
 {
 	RobotDrive robotDrive; // robot drive system (1, 6, 8, 7)
 	Victor shooter_1;  //shooter 1 V2
 	Victor shooter_2;  //shooter 2 V3
-	Victor cradle_lift; //Lifter 1 V4
-	Victor down;	//Make it out V5
-	Victor aquire;  //Picker upper V9
+	Victor aquire; //Lifter 1 V4
+	Victor cradle_lift;	//Picker upper V5 
+	Victor down;  //Make it out V9
 	
 	Joystick stick_1; // driving
 	//Joystick stick_2; // shooting
@@ -28,9 +59,14 @@ class ByronMecanum : public IterativeRobot
 	Gyro gyro; 
 	Ultrasonic ultra;
 	
+	NetworkTable *preferencesTable;
+	
 	bool ran;
 	
-	//float speed;
+	float voltage;
+	float GetBatteryVoltage;
+
+	
 	
 //	Compressor *m_compressor; 
 //	bool solenoid_1;
@@ -44,16 +80,16 @@ public:
 		robotDrive(1, 6, 8, 7),	// these must be initialized in the same order
 		shooter_1(2),
 		shooter_2(3),	
-		cradle_lift(4),
-		down(5),
-		aquire(9),
+		aquire(4),
+		cradle_lift(5),
+		down(9),
 		
 		stick_1(1),		// as they are declared above.	
 		//stick_2(2),		// same 
 		xbox(2),
 		
 		gyro(1),
-	    ultra(2, 2)
+	    ultra(2, 2) 
 	{
 		
 		ran = false;
@@ -64,7 +100,10 @@ public:
 		robotDrive.SetInvertedMotor(robotDrive.kFrontRightMotor, true);
 		robotDrive.SetInvertedMotor(robotDrive.kRearRightMotor, true);
 		
-		//speed = 0.0;
+		preferencesTable = NetworkTable::GetTable("Preferences");
+
+	
+
 		//Compressor *c = new Compressor(4, 2);  c->Start(); 
 //		solenoid_1 = false;
 //		solenoid_2 = false;
@@ -178,94 +217,51 @@ void ByronMecanum::TeleopPeriodic() {
 	x = ((fabs(x) < deadzone) ? (0) : (x));
 	y = ((fabs(y) < deadzone) ? (0) : (y));	
 	z = ((fabs(z) < deadzone) ? (0) : (z));
-
-	if(xbox.GetButton03()){
-			shooter_1.Set(1.0);
-			shooter_2.Set(1.0);
-		}	
-	if (xbox.GetButton04()) {
-			cradle_lift.Set(1.0);
-			Wait(0.3);
-			cradle_lift.Set(0.0);
-		}
+	
+	//shooter_1.Set(1.0);
+	//shooter_2.Set(1.0);
+	
 	if (xbox.GetButton01()){
-			shooter_1.Set(0.0);
-			shooter_2.Set(0.0);
-			if (xbox.GetButton01()) {
-				cradle_lift.Set(-1.0);
-				Wait(0.3);
-				cradle_lift.Set(0.0);
-			}
-		}
-	
-		SmartDashboard::PutBoolean("1", xbox.GetButton01());
-		SmartDashboard::PutBoolean("2", xbox.GetButton02());
-		SmartDashboard::PutBoolean("3", xbox.GetButton03());
-		SmartDashboard::PutBoolean("4", xbox.GetButton04());
-		SmartDashboard::PutBoolean("5", xbox.GetButton05());
-		SmartDashboard::PutBoolean("6", xbox.GetButton06());
-		SmartDashboard::PutBoolean("7", xbox.GetButton07());
-		SmartDashboard::PutBoolean("8", xbox.GetButton08());
-		SmartDashboard::PutBoolean("9", xbox.GetButton09());
-		SmartDashboard::PutBoolean("10", xbox.GetButton10());
-		SmartDashboard::PutBoolean("11", xbox.GetButton11());
-		SmartDashboard::PutBoolean("12", xbox.GetButton12());		
-	
-	
-/*		
-	if(stick_2.GetTrigger()){
-		shooter_1.Set(stick_2.GetY()*-1.0);
-		shooter_2.Set(stick_2.GetY()*-1.0);
-	}	else {
 		shooter_1.Set(0.0);
-		shooter_2.Set(0.0);
-	}
-	 
-	if (stick_2.GetRawButton(3)) {
-		cradle_lift.Set(stick_2.GetThrottle());
-	}
-	else {
+		shooter_2.Set(0.0);				
+		cradle_lift.Set(-1.0);
+		Wait(0.3);
+		cradle_lift.Set(0.0);	
+	}	
+	if (xbox.GetButton02()) {
+		cradle_lift.Set(1.0);
+		Wait(0.3);
 		cradle_lift.Set(0.0);
 	}
-
-	if (stick_2.GetRawButton(2)) {
-		aquire.Set(stick_2.GetThrottle());
-	}	else {
-		aquire.Set(0.0);
+	if(xbox.GetButton03()){
+		shooter_1.Set(11.8/voltage);
+		shooter_2.Set(11.8/voltage);
 	}
-	
-	if (stick_2.GetRawButton(4)) {
-		down.Set(1.0);
-	}	else {
-		down.Set(0.0);
-	}
-*/
-	/*if (stick_2.GetRawButton(3)) {
-		cradle_lift.Set(stick_2.GetThrottle());
-	}
-	else {
-		cradle_lift.Set(0.0);
-	}
-
-	if (stick_2.GetRawButton(2)) {
-		aquire.Set(stick_2.GetThrottle());
-	}	else {
-		aquire.Set(0.0);
-	}
-	
-	if (stick_2.GetRawButton(4)) {
-		down.Set(1.0);
-	}	else {
-		down.Set(0.0);
+	if(xbox.GetRockerX()) {
+			down.Set(1.0);
+			Wait(0.5);
+			down.Set(0.0);	
+		}
+	if(xbox.GetLeftY()){
+		aquire.Set(xbox.GetLeftY());
 	} 
-	*/
-		
-
 	
-//	solenoid_1 = xbox.GetButton05();
-//	solenoid_2 = xbox.GetButton06();
-//	solenoid_3 = xbox.GetRockerX();
-//	solenoid_4 = xbox.GetRockerY();
+	if(xbox.GetButton05()){
+		shooter_1.Get();
+		shooter_2.Set();
+	}
+		
+	
+	preferencesTable->PutString("s_1", "998899");
+	preferencesTable->GetString("s_1", "Empty");
+	
+	preferencesTable->PutString("s_2", "0.0");
+	preferencesTable->GetString("s_2", "Empty");
+	
+		
+	
+	voltage = DriverStation::GetInstance()->GetBatteryVoltage();
+	SmartDashboard::PutNumber("Voltage", voltage);
 	
 	SmartDashboard::PutNumber("x",stick_1.GetX());
 	SmartDashboard::PutNumber("y",stick_1.GetY());
@@ -275,8 +271,91 @@ void ByronMecanum::TeleopPeriodic() {
 	//SmartDashboard::PutNumber("z2",stick_2.GetZ());
 	//SmartDashboard::PutNumber("throt2",stick_2.GetThrottle());
 	//SmartDashboard::PutNumber("Twist", stick_2.GetTwist());
-	//speed = SmartDashboard::GetNumber("Speed");
-	//SmartDashboard::PutNumber("Speed", speed);	
+
+	//System.out.println( "pref1 = " + preferencesTable->GetString("pref1", "Empty"));
+		
+	/*if(xbox.GetLeftY()){
+		aquire.Set(xbox.GetLeftY());
+	} 	
+	
+	if(xbox.GetButton04()) {
+		down.Set(1.0);
+		Wait(0.5);
+		down.Set(0.0);
+	}
+	
+	if(xbox.GetButton()) {
+		shooter_1.Set(1.0);
+		shooter_2.Set(1.0);
+	} else {
+		shooter_1.Set(0.0);
+		shooter_2.Set(0.0);
+	}
+	
+	if(xbox.GetRockerY()) {
+		cradle_lift.Set(1.0);
+		Wait(0.3);
+		cradle_lift.Set(-1.0);
+		Wait(0.3);
+		cradle_lift.Set(0.0);
+	} */
+	
+	
+	/*		
+		if(stick_2.GetTrigger()){
+			shooter_1.Set(stick_2.GetY()*-1.0);
+			shooter_2.Set(stick_2.GetY()*-1.0);
+		}	else {
+			shooter_1.Set(0.0);
+			shooter_2.Set(0.0);
+		}
+		 
+		if (stick_2.GetRawButton(3)) {
+			cradle_lift.Set(stick_2.GetThrottle());
+		}
+		else {
+			cradle_lift.Set(0.0);
+		}
+
+		if (stick_2.GetRawButton(2)) {
+			aquire.Set(stick_2.GetThrottle());
+		}	else {
+			aquire.Set(0.0);
+		}
+		
+		if (stick_2.GetRawButton(4)) {
+			down.Set(1.0);
+		}	else {
+			down.Set(0.0);
+		}
+		if (stick_2.GetRawButton(3)) {
+			cradle_lift.Set(stick_2.GetThrottle());
+		}
+		else {
+			cradle_lift.Set(0.0);
+		}
+
+		if (stick_2.GetRawButton(2)) {
+			aquire.Set(stick_2.GetThrottle());
+		}	else {
+			aquire.Set(0.0);
+		}
+		
+		if (stick_2.GetRawButton(4)) {
+			down.Set(1.0);
+		}	else {
+			down.Set(0.0);
+		} 
+		*/
+			
+
+		
+	//	solenoid_1 = xbox.GetButton05();
+	//	solenoid_2 = xbox.GetButton06();
+	//	solenoid_3 = xbox.GetRockerX();
+	//	solenoid_4 = xbox.GetRockerY();
+		
+	
 	robotDrive.MecanumDrive_Cartesian(x, y, z);
 	}
 /**
